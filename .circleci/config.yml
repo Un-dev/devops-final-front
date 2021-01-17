@@ -47,7 +47,19 @@ jobs:
             docker tag $IMAGE_NAME:app $IMAGE_NAME:latest
             docker push $IMAGE_NAME:$CIRCLE_BUILD_NUM
             docker push $IMAGE_NAME:latest 
-               
+  netlify_deploy:
+    docker:
+      - image: circleci/node:dubnium-browsers
+    working_directory: ~/devops-final-dront-undev
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Deploy app
+          command: |
+            ls -al /tmp
+            sudo npm install -g --silent netlify-cli
+            netlify deploy --prod --auth $NETLIFY_AUTH_TOKEN --dir=/tmp/server-doc --site $SITEID
 workflows:
   build_deploy_netlify:
     jobs:
@@ -58,5 +70,10 @@ workflows:
       - docker_push:
           requires:
             - docker_build
+          context:
+            - back_final
+      - netlify_deploy:
+          requires:
+            - build
           context:
             - back_final
