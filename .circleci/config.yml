@@ -6,6 +6,15 @@ jobs:
       - image: circleci/node:dubnium-browsers
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - dependencies-{{ checksum "package.json" }}-{{ .Environment.CACHE_VERSION }}
+            - dependencies-
+      - run: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: dependencies-{{ checksum "package.json" }}-{{ .Environment.CACHE_VERSION }}
 
 workflows:
   build_deploy_netlify:
