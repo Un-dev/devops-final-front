@@ -15,7 +15,7 @@ jobs:
           paths:
             - node_modules
           key: dependencies-{{ checksum "package.json" }}-{{ .Environment.CACHE_VERSION }}
-  build_docker:
+  docker_build:
     environment:
       IMAGE_NAME: sgttabouret/devops-final-front
     docker:
@@ -29,11 +29,34 @@ jobs:
           root: .
           paths:
             - ./image.tar
-   
+  docker_push:
+    environment:
+      IMAGE_NAME: sgttabouret/devops-final-front
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Login and push to DockerHub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login --username sgttabouret --password-stdin
+            docker tag $IMAGE_NAME:app $IMAGE_NAME:$CIRCLE_BUILD_NUM
+            docker tag $IMAGE_NAME:app $IMAGE_NAME:latest
+            docker push $IMAGE_NAME:$CIRCLE_BUILD_NUM
+            docker push $IMAGE_NAME:latest 
+               
 workflows:
   build_deploy_netlify:
     jobs:
       - build
-      - build_docker:
+      - docker_build:
           requires:
             - build
+      - docker_push:
+          requires:
+            - build_docker
+          context:
+            - back_final
