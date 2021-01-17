@@ -15,8 +15,25 @@ jobs:
           paths:
             - node_modules
           key: dependencies-{{ checksum "package.json" }}-{{ .Environment.CACHE_VERSION }}
-
+  build_docker:
+    environment:
+      IMAGE_NAME: sgttabouret/devops-final-front
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: docker image build --tag $IMAGE_NAME:app .
+      - run: docker save -o image.tar $IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+   
 workflows:
   build_deploy_netlify:
     jobs:
       - build
+      - build_docker:
+          requires:
+            - build
