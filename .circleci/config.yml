@@ -57,6 +57,6 @@ workflows:
             - build
       - docker_push:
           requires:
-            - build_docker
+            - docker_build
           context:
             - back_final
