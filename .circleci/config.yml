@@ -55,8 +55,8 @@ jobs:
       - checkout
       - restore_cache: 
           keys: 
-            - yarn-packages-{{ checksum "yarn.lock" }}-{{ .Environment.CACHE_VERSION }}
-      - run: yarn run build
+            - dependencies-{{ checksum "package.json" }}-{{ .Environment.CACHE_VERSION }}
+      - run: npm run build
       - run:
           name: Copy build to workspace
           command: |
