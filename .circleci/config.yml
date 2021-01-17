@@ -1,0 +1,13 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:dubnium-browsers
+    steps:
+      - checkout
+
+workflows:
+  build_deploy_netlify:
+    jobs:
+      - build
